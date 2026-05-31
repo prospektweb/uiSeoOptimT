@@ -7,12 +7,14 @@ use Bitrix\Main\Localization\Loc;
 use Prospektweb\UiSeoOptimT\Service\AsproTemplatePatcher;
 use Prospektweb\UiSeoOptimT\Service\ModuleConfig;
 use Prospektweb\UiSeoOptimT\Service\PropertyManager;
+use Prospektweb\UiSeoOptimT\Service\PropertyValueDescriptionInstaller;
 
 Loc::loadMessages(__FILE__);
 
 require_once dirname(__DIR__) . '/lib/Service/ModuleConfig.php';
 require_once dirname(__DIR__) . '/lib/Service/PropertyManager.php';
 require_once dirname(__DIR__) . '/lib/Service/AsproTemplatePatcher.php';
+require_once dirname(__DIR__) . '/lib/Service/PropertyValueDescriptionInstaller.php';
 
 class prospektweb_uiseooptimt extends CModule
 {
@@ -63,6 +65,7 @@ class prospektweb_uiseooptimt extends CModule
             Loader::includeModule($this->MODULE_ID);
 
             (new PropertyManager())->ensureTrCaseProperty($productsIblockId);
+            (new PropertyValueDescriptionInstaller())->ensure();
             $this->InstallFiles();
             $this->registerEvents();
 
@@ -105,6 +108,7 @@ class prospektweb_uiseooptimt extends CModule
         ModuleConfig::setProductsIblockId($productsIblockId);
         ModuleConfig::setOffersIblockId($offersIblockId);
         (new PropertyManager())->ensureTrCaseProperty($productsIblockId);
+        (new PropertyValueDescriptionInstaller())->ensure();
 
         return true;
     }
@@ -116,6 +120,7 @@ class prospektweb_uiseooptimt extends CModule
                 ModuleConfig::getProductsIblockId(),
                 ModuleConfig::getOffersIblockId()
             );
+            (new PropertyValueDescriptionInstaller())->uninstall(true);
         }
 
         return true;
@@ -222,7 +227,7 @@ class prospektweb_uiseooptimt extends CModule
 
     private function checkDependencies(): void
     {
-        foreach (['iblock', 'catalog', 'sale'] as $module) {
+        foreach (['iblock', 'catalog', 'sale', 'highloadblock'] as $module) {
             if (!Loader::includeModule($module)) {
                 throw new RuntimeException('Не найден обязательный модуль: ' . $module);
             }
