@@ -1,6 +1,6 @@
 <?php
 
-namespace Prospektweb\UiSeoOptimT\Service;
+namespace Prospektweb\PropValManager\Service;
 
 use Bitrix\Highloadblock\HighloadBlockTable;
 use Bitrix\Main\Data\Cache;
@@ -8,7 +8,7 @@ use Bitrix\Main\Loader;
 
 final class PropertyDescriptionService
 {
-    public const CACHE_DIR = '/prospektweb/uiseooptimt/property_value_descriptions';
+    public const CACHE_DIR = '/prospektweb/propvalmanager/property_value_descriptions';
     public const CACHE_TTL = 86400;
 
     /**

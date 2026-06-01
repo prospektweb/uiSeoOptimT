@@ -4,10 +4,10 @@ use Bitrix\Catalog\CatalogIblockTable;
 use Bitrix\Main\Application;
 use Bitrix\Main\Loader;
 use Bitrix\Main\Localization\Loc;
-use Prospektweb\UiSeoOptimT\Service\AsproTemplatePatcher;
-use Prospektweb\UiSeoOptimT\Service\ModuleConfig;
-use Prospektweb\UiSeoOptimT\Service\PropertyManager;
-use Prospektweb\UiSeoOptimT\Service\PropertyValueDescriptionInstaller;
+use Prospektweb\PropValManager\Service\AsproTemplatePatcher;
+use Prospektweb\PropValManager\Service\ModuleConfig;
+use Prospektweb\PropValManager\Service\PropertyManager;
+use Prospektweb\PropValManager\Service\PropertyValueDescriptionInstaller;
 
 Loc::loadMessages(__FILE__);
 
@@ -16,11 +16,11 @@ require_once dirname(__DIR__) . '/lib/Service/PropertyManager.php';
 require_once dirname(__DIR__) . '/lib/Service/AsproTemplatePatcher.php';
 require_once dirname(__DIR__) . '/lib/Service/PropertyValueDescriptionInstaller.php';
 
-class prospektweb_uiseooptimt extends CModule
+class prospektweb_propvalmanager extends CModule
 {
-    public $MODULE_ID = 'prospektweb.uiseooptimt';
-    public $MODULE_NAME = 'PROSPEKT-WEB: UI/SEO Optim Transformer';
-    public $MODULE_DESCRIPTION = 'UI/SEO улучшения и управление свойствами для Aspro Premier';
+    public $MODULE_ID = 'prospektweb.propvalmanager';
+    public $MODULE_NAME = 'PROSPEKT-WEB: Property Value Manager';
+    public $MODULE_DESCRIPTION = 'Управление расширенными описаниями значений свойств инфоблоков';
     public $PARTNER_NAME = 'PROSPEKT-WEB';
     public $PARTNER_URI = 'https://prospektweb.ru';
 
@@ -142,10 +142,10 @@ class prospektweb_uiseooptimt extends CModule
     {
         [$productsIblockId, $offersIblockId] = $this->resolveIblocks();
 
-        $GLOBALS['PROSPEKTWEB_UISEOOPTIMT_PRODUCTS_IBLOCKS'] = $this->getIblockList($productsIblockId);
-        $GLOBALS['PROSPEKTWEB_UISEOOPTIMT_OFFERS_IBLOCKS'] = $this->getIblockList($offersIblockId);
-        $GLOBALS['PROSPEKTWEB_UISEOOPTIMT_PRODUCTS_IBLOCK_ID'] = $productsIblockId;
-        $GLOBALS['PROSPEKTWEB_UISEOOPTIMT_OFFERS_IBLOCK_ID'] = $offersIblockId;
+        $GLOBALS['PROSPEKTWEB_PROPVALMANAGER_PRODUCTS_IBLOCKS'] = $this->getIblockList($productsIblockId);
+        $GLOBALS['PROSPEKTWEB_PROPVALMANAGER_OFFERS_IBLOCKS'] = $this->getIblockList($offersIblockId);
+        $GLOBALS['PROSPEKTWEB_PROPVALMANAGER_PRODUCTS_IBLOCK_ID'] = $productsIblockId;
+        $GLOBALS['PROSPEKTWEB_PROPVALMANAGER_OFFERS_IBLOCK_ID'] = $offersIblockId;
     }
 
     /** @return array<int, array{id:int,name:string,selected:bool}> */

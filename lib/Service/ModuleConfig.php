@@ -1,12 +1,12 @@
 <?php
 
-namespace Prospektweb\UiSeoOptimT\Service;
+namespace Prospektweb\PropValManager\Service;
 
 use Bitrix\Main\Config\Option;
 
 final class ModuleConfig
 {
-    public const MODULE_ID = 'prospektweb.uiseooptimt';
+    public const MODULE_ID = 'prospektweb.propvalmanager';
 
     public const ENABLED = 'ENABLED';
     public const PRODUCTS_IBLOCK_ID = 'PRODUCTS_IBLOCK_ID';

@@ -5,27 +5,27 @@ if (!check_bitrix_sessid()) {
 
 $request = \Bitrix\Main\Application::getInstance()->getContext()->getRequest();
 if ($request->getPost('install_step') === '2') {
-    echo CAdminMessage::ShowNote('Модуль prospektweb.uiseooptimt успешно установлен.');
+    echo CAdminMessage::ShowNote('Модуль prospektweb.propvalmanager успешно установлен.');
     ?>
-    <p><a href="/bitrix/admin/settings.php?lang=<?php echo LANGUAGE_ID; ?>&mid=prospektweb.uiseooptimt">Перейти в настройки</a></p>
+    <p><a href="/bitrix/admin/settings.php?lang=<?php echo LANGUAGE_ID; ?>&mid=prospektweb.propvalmanager">Перейти в настройки</a></p>
     <p><a href="/bitrix/admin/partner_modules.php?lang=<?php echo LANGUAGE_ID; ?>">К списку модулей</a></p>
     <?php
     return;
 }
 
-$productsIblocks = is_array($GLOBALS['PROSPEKTWEB_UISEOOPTIMT_PRODUCTS_IBLOCKS'] ?? null)
-    ? $GLOBALS['PROSPEKTWEB_UISEOOPTIMT_PRODUCTS_IBLOCKS']
+$productsIblocks = is_array($GLOBALS['PROSPEKTWEB_PROPVALMANAGER_PRODUCTS_IBLOCKS'] ?? null)
+    ? $GLOBALS['PROSPEKTWEB_PROPVALMANAGER_PRODUCTS_IBLOCKS']
     : [];
-$offersIblocks = is_array($GLOBALS['PROSPEKTWEB_UISEOOPTIMT_OFFERS_IBLOCKS'] ?? null)
-    ? $GLOBALS['PROSPEKTWEB_UISEOOPTIMT_OFFERS_IBLOCKS']
+$offersIblocks = is_array($GLOBALS['PROSPEKTWEB_PROPVALMANAGER_OFFERS_IBLOCKS'] ?? null)
+    ? $GLOBALS['PROSPEKTWEB_PROPVALMANAGER_OFFERS_IBLOCKS']
     : [];
-$detectedProductsIblockId = (int)($GLOBALS['PROSPEKTWEB_UISEOOPTIMT_PRODUCTS_IBLOCK_ID'] ?? 0);
-$detectedOffersIblockId = (int)($GLOBALS['PROSPEKTWEB_UISEOOPTIMT_OFFERS_IBLOCK_ID'] ?? 0);
+$detectedProductsIblockId = (int)($GLOBALS['PROSPEKTWEB_PROPVALMANAGER_PRODUCTS_IBLOCK_ID'] ?? 0);
+$detectedOffersIblockId = (int)($GLOBALS['PROSPEKTWEB_PROPVALMANAGER_OFFERS_IBLOCK_ID'] ?? 0);
 ?>
 <form action="<?php echo $APPLICATION->GetCurPage(); ?>" method="post">
     <?php echo bitrix_sessid_post(); ?>
     <input type="hidden" name="lang" value="<?php echo htmlspecialcharsbx(LANGUAGE_ID); ?>">
-    <input type="hidden" name="id" value="prospektweb.uiseooptimt">
+    <input type="hidden" name="id" value="prospektweb.propvalmanager">
     <input type="hidden" name="install" value="Y">
     <input type="hidden" name="install_step" value="2">
 

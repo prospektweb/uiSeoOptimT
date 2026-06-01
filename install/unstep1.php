@@ -6,7 +6,7 @@ if (!check_bitrix_sessid()) {
 <form action="<?php echo $APPLICATION->GetCurPage(); ?>" method="post">
     <?php echo bitrix_sessid_post(); ?>
     <input type="hidden" name="lang" value="<?php echo htmlspecialcharsbx(LANGUAGE_ID); ?>">
-    <input type="hidden" name="id" value="prospektweb.uiseooptimt">
+    <input type="hidden" name="id" value="prospektweb.propvalmanager">
     <input type="hidden" name="uninstall" value="Y">
 
     <p>Удалить данные модуля (включая свойства, созданные модулем, например TR_CASE)?</p>

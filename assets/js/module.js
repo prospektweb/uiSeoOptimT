@@ -1,3 +1,3 @@
 (function () {
-    console.log('prospektweb.uiseooptimt loaded');
+    console.log('prospektweb.propvalmanager loaded');
 })();

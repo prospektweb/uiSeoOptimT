@@ -1,6 +1,6 @@
 <?php
 
-namespace Prospektweb\UiSeoOptimT\Service;
+namespace Prospektweb\PropValManager\Service;
 
 use Bitrix\Highloadblock\HighloadBlockTable;
 use Bitrix\Main\Loader;

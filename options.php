@@ -1,14 +1,14 @@
 <?php
 
-define('ADMIN_MODULE_NAME', 'prospektweb.uiseooptimt');
+define('ADMIN_MODULE_NAME', 'prospektweb.propvalmanager');
 
-define('PROSPEKTWEB_UISEOOPTIMT_SELF', $APPLICATION->GetCurPage() . '?mid=' . urlencode(ADMIN_MODULE_NAME) . '&lang=' . LANGUAGE_ID);
+define('PROSPEKTWEB_PROPVALMANAGER_SELF', $APPLICATION->GetCurPage() . '?mid=' . urlencode(ADMIN_MODULE_NAME) . '&lang=' . LANGUAGE_ID);
 
 use Bitrix\Catalog\CatalogIblockTable;
 use Bitrix\Main\Loader;
-use Prospektweb\UiSeoOptimT\Service\ModuleConfig;
-use Prospektweb\UiSeoOptimT\Service\PropertyValueDescriptionInstaller;
-use Prospektweb\UiSeoOptimT\Service\PropertyValueDescriptionRepository;
+use Prospektweb\PropValManager\Service\ModuleConfig;
+use Prospektweb\PropValManager\Service\PropertyValueDescriptionInstaller;
+use Prospektweb\PropValManager\Service\PropertyValueDescriptionRepository;
 
 if (!$USER->IsAdmin()) {
     return;
@@ -53,7 +53,7 @@ if ($request->isPost() && check_bitrix_sessid()) {
             }
 
             if ($productsIblockId > 0 && $offersIblockId <= 0) {
-                $offersIblockId = prospektweb_uiseooptimt_resolve_offers_iblock($productsIblockId);
+                $offersIblockId = prospektweb_propvalmanager_resolve_offers_iblock($productsIblockId);
             }
 
             if (empty($errors)) {
@@ -64,18 +64,18 @@ if ($request->isPost() && check_bitrix_sessid()) {
             }
         } elseif ($action === 'create') {
             $repository->create(
-                prospektweb_uiseooptimt_binding_from_request($request),
-                prospektweb_uiseooptimt_content_from_request($request)
+                prospektweb_propvalmanager_binding_from_request($request),
+                prospektweb_propvalmanager_content_from_request($request)
             );
             $notes[] = 'Описание создано и привязано к значению списка.';
         } elseif ($action === 'update') {
-            $repository->update((int)$request->getPost('DESCRIPTION_ID'), prospektweb_uiseooptimt_content_from_request($request));
+            $repository->update((int)$request->getPost('DESCRIPTION_ID'), prospektweb_propvalmanager_content_from_request($request));
             $notes[] = 'Описание обновлено.';
         } elseif ($action === 'unlink') {
             $repository->unlink((int)$request->getPost('DESCRIPTION_ID'));
             $notes[] = 'Описание отвязано от значения списка.';
         } elseif ($action === 'link') {
-            $repository->link((int)$request->getPost('EXISTING_DESCRIPTION_ID'), prospektweb_uiseooptimt_binding_from_request($request));
+            $repository->link((int)$request->getPost('EXISTING_DESCRIPTION_ID'), prospektweb_propvalmanager_binding_from_request($request));
             $notes[] = 'Существующее описание привязано к значению списка.';
         }
     } catch (\Throwable $e) {
@@ -96,14 +96,14 @@ foreach ($notes as $note) {
 $productsIblockId = ModuleConfig::getProductsIblockId();
 $offersIblockId = ModuleConfig::getOffersIblockId();
 if ($productsIblockId > 0 && $offersIblockId <= 0) {
-    $offersIblockId = prospektweb_uiseooptimt_resolve_offers_iblock($productsIblockId);
+    $offersIblockId = prospektweb_propvalmanager_resolve_offers_iblock($productsIblockId);
 }
 
-$catalogIblocks = prospektweb_uiseooptimt_get_iblocks($productsIblockId);
-$offersIblocks = prospektweb_uiseooptimt_get_iblocks($offersIblockId);
+$catalogIblocks = prospektweb_propvalmanager_get_iblocks($productsIblockId);
+$offersIblocks = prospektweb_propvalmanager_get_iblocks($offersIblockId);
 $allValues = [];
-$productProperties = prospektweb_uiseooptimt_get_list_properties($productsIblockId, 'product', $allValues);
-$offerProperties = prospektweb_uiseooptimt_get_list_properties($offersIblockId, 'offer', $allValues);
+$productProperties = prospektweb_propvalmanager_get_list_properties($productsIblockId, 'product', $allValues);
+$offerProperties = prospektweb_propvalmanager_get_list_properties($offersIblockId, 'offer', $allValues);
 $linkedMap = $repository->getLinkedMap($allValues);
 $availableDescriptions = $repository->getAvailableDescriptions();
 $editId = (int)$request->getQuery('edit_description_id');
@@ -126,7 +126,7 @@ $tabControl = new CAdminTabControl('tabControl', $aTabs);
     .pwu-description-form .adm-detail-content-table td { padding: 7px 10px; vertical-align: top; }
     .pwu-description-form-actions { margin-top: 12px; padding-left: 30%; }
 </style>
-<form method="post" action="<?php echo PROSPEKTWEB_UISEOOPTIMT_SELF; ?>">
+<form method="post" action="<?php echo PROSPEKTWEB_PROPVALMANAGER_SELF; ?>">
     <?php
     $tabControl->Begin();
     $tabControl->BeginNextTab();
@@ -178,15 +178,15 @@ $tabControl = new CAdminTabControl('tabControl', $aTabs);
 </form>
 
 <?php if ($editId > 0 || $viewId > 0): ?>
-    <?php prospektweb_uiseooptimt_render_description_card($editId ?: $viewId, $repository, $viewId > 0); ?>
+    <?php prospektweb_propvalmanager_render_description_card($editId ?: $viewId, $repository, $viewId > 0); ?>
 <?php endif; ?>
 
-<?php prospektweb_uiseooptimt_render_properties_block('Свойства товара типа «Список» с CALC_', $productProperties, $linkedMap, $availableDescriptions, $repository, $createKey); ?>
-<?php prospektweb_uiseooptimt_render_properties_block('Свойства торговых предложений типа «Список» с CALC_', $offerProperties, $linkedMap, $availableDescriptions, $repository, $createKey); ?>
+<?php prospektweb_propvalmanager_render_properties_block('Свойства товара типа «Список» с CALC_', $productProperties, $linkedMap, $availableDescriptions, $repository, $createKey); ?>
+<?php prospektweb_propvalmanager_render_properties_block('Свойства торговых предложений типа «Список» с CALC_', $offerProperties, $linkedMap, $availableDescriptions, $repository, $createKey); ?>
 
 <?php
 /** @return array<int, array{id:int,name:string,selected:bool}> */
-function prospektweb_uiseooptimt_get_iblocks(int $selectedId): array
+function prospektweb_propvalmanager_get_iblocks(int $selectedId): array
 {
     $items = [];
     if (!Loader::includeModule('iblock') || !class_exists('CIBlock')) {
@@ -206,7 +206,7 @@ function prospektweb_uiseooptimt_get_iblocks(int $selectedId): array
     return $items;
 }
 
-function prospektweb_uiseooptimt_resolve_offers_iblock(int $productsIblockId): int
+function prospektweb_propvalmanager_resolve_offers_iblock(int $productsIblockId): int
 {
     if ($productsIblockId <= 0 || !Loader::includeModule('catalog')) {
         return 0;
@@ -229,7 +229,7 @@ function prospektweb_uiseooptimt_resolve_offers_iblock(int $productsIblockId): i
 }
 
 /** @param array<int, array<string, mixed>> $allValues @return array<int, array<string, mixed>> */
-function prospektweb_uiseooptimt_get_list_properties(int $iblockId, string $entityType, array &$allValues): array
+function prospektweb_propvalmanager_get_list_properties(int $iblockId, string $entityType, array &$allValues): array
 {
     $properties = [];
     if ($iblockId <= 0 || !Loader::includeModule('iblock')) {
@@ -279,7 +279,7 @@ function prospektweb_uiseooptimt_get_list_properties(int $iblockId, string $enti
 }
 
 /** @return array<string, mixed> */
-function prospektweb_uiseooptimt_binding_from_request($request): array
+function prospektweb_propvalmanager_binding_from_request($request): array
 {
     return [
         'UF_IBLOCK_ID' => (int)$request->getPost('UF_IBLOCK_ID'),
@@ -292,7 +292,7 @@ function prospektweb_uiseooptimt_binding_from_request($request): array
 }
 
 /** @return array<string, mixed> */
-function prospektweb_uiseooptimt_content_from_request($request): array
+function prospektweb_propvalmanager_content_from_request($request): array
 {
     $content = [
         'UF_ACTIVE' => $request->getPost('UF_ACTIVE') === 'Y' ? 1 : 0,
@@ -309,7 +309,7 @@ function prospektweb_uiseooptimt_content_from_request($request): array
     ];
 
     foreach (['UF_ICON', 'UF_IMAGE', 'UF_DOCUMENT'] as $fieldName) {
-        $file = prospektweb_uiseooptimt_uploaded_file($fieldName . '_FILE');
+        $file = prospektweb_propvalmanager_uploaded_file($fieldName . '_FILE');
         if ($file !== null) {
             $content[$fieldName] = $file;
         }
@@ -319,7 +319,7 @@ function prospektweb_uiseooptimt_content_from_request($request): array
 }
 
 /** @return array<string, mixed>|null */
-function prospektweb_uiseooptimt_uploaded_file(string $inputName): ?array
+function prospektweb_propvalmanager_uploaded_file(string $inputName): ?array
 {
     if (empty($_FILES[$inputName]) || !is_array($_FILES[$inputName])) {
         return null;
@@ -334,7 +334,7 @@ function prospektweb_uiseooptimt_uploaded_file(string $inputName): ?array
 }
 
 /** @param array<int, array<string, mixed>> $properties @param array<string, array<string, mixed>> $linkedMap @param array<int, array<string, mixed>> $availableDescriptions */
-function prospektweb_uiseooptimt_render_properties_block(string $title, array $properties, array $linkedMap, array $availableDescriptions, PropertyValueDescriptionRepository $repository, string $createKey = ''): void
+function prospektweb_propvalmanager_render_properties_block(string $title, array $properties, array $linkedMap, array $availableDescriptions, PropertyValueDescriptionRepository $repository, string $createKey = ''): void
 {
     echo '<div class="pwu-property-block">';
     echo '<h2>' . htmlspecialcharsbx($title) . '</h2>';
@@ -365,11 +365,11 @@ function prospektweb_uiseooptimt_render_properties_block(string $title, array $p
                 echo '<span style="color:#999">Нет описания</span>';
             }
             echo '</td><td class="adm-list-table-cell">';
-            prospektweb_uiseooptimt_render_actions($value, $description, $availableDescriptions, $repository);
+            prospektweb_propvalmanager_render_actions($value, $description, $availableDescriptions, $repository);
             echo '</td></tr>';
             if (!$description && $createKey === $key) {
                 echo '<tr class="adm-list-table-row"><td class="adm-list-table-cell" colspan="5">';
-                prospektweb_uiseooptimt_render_description_form('create', 0, [], $value);
+                prospektweb_propvalmanager_render_description_form('create', 0, [], $value);
                 echo '</td></tr>';
             }
         }
@@ -379,24 +379,24 @@ function prospektweb_uiseooptimt_render_properties_block(string $title, array $p
 }
 
 /** @param array<string, mixed> $value @param array<string, mixed>|null $description @param array<int, array<string, mixed>> $availableDescriptions */
-function prospektweb_uiseooptimt_render_actions(array $value, ?array $description, array $availableDescriptions, PropertyValueDescriptionRepository $repository): void
+function prospektweb_propvalmanager_render_actions(array $value, ?array $description, array $availableDescriptions, PropertyValueDescriptionRepository $repository): void
 {
-    $hidden = prospektweb_uiseooptimt_hidden_binding($value);
+    $hidden = prospektweb_propvalmanager_hidden_binding($value);
     if ($description) {
         $id = (int)$description['ID'];
-        echo '<a class="adm-btn" href="' . PROSPEKTWEB_UISEOOPTIMT_SELF . '&view_description_id=' . $id . '">Просмотреть описание</a> ';
-        echo '<a class="adm-btn adm-btn-save" href="' . PROSPEKTWEB_UISEOOPTIMT_SELF . '&edit_description_id=' . $id . '">Редактировать описание</a> ';
-        echo '<form method="post" action="' . PROSPEKTWEB_UISEOOPTIMT_SELF . '" style="display:inline">' . bitrix_sessid_post() . '<input type="hidden" name="description_action" value="unlink"><input type="hidden" name="DESCRIPTION_ID" value="' . $id . '"><input type="submit" class="adm-btn" value="Отвязать описание"></form>';
+        echo '<a class="adm-btn" href="' . PROSPEKTWEB_PROPVALMANAGER_SELF . '&view_description_id=' . $id . '">Просмотреть описание</a> ';
+        echo '<a class="adm-btn adm-btn-save" href="' . PROSPEKTWEB_PROPVALMANAGER_SELF . '&edit_description_id=' . $id . '">Редактировать описание</a> ';
+        echo '<form method="post" action="' . PROSPEKTWEB_PROPVALMANAGER_SELF . '" style="display:inline">' . bitrix_sessid_post() . '<input type="hidden" name="description_action" value="unlink"><input type="hidden" name="DESCRIPTION_ID" value="' . $id . '"><input type="submit" class="adm-btn" value="Отвязать описание"></form>';
         return;
     }
 
-    $createUrl = prospektweb_uiseooptimt_admin_url([
+    $createUrl = prospektweb_propvalmanager_admin_url([
         'create_description_key' => $repository->makeKey((int)$value['IBLOCK_ID'], (int)$value['PROPERTY_ID'], (string)$value['XML_ID']),
     ]);
     echo '<a class="adm-btn adm-btn-save" href="' . htmlspecialcharsbx($createUrl) . '">Создать описание</a>';
 
     if (!empty($availableDescriptions)) {
-        echo '<form method="post" action="' . PROSPEKTWEB_UISEOOPTIMT_SELF . '" style="margin-top:6px">' . bitrix_sessid_post() . $hidden . '<input type="hidden" name="description_action" value="link"><select name="EXISTING_DESCRIPTION_ID">';
+        echo '<form method="post" action="' . PROSPEKTWEB_PROPVALMANAGER_SELF . '" style="margin-top:6px">' . bitrix_sessid_post() . $hidden . '<input type="hidden" name="description_action" value="link"><select name="EXISTING_DESCRIPTION_ID">';
         foreach ($availableDescriptions as $item) {
             echo '<option value="' . (int)$item['ID'] . '">#' . (int)$item['ID'] . ' ' . htmlspecialcharsbx((string)($item['UF_TITLE'] ?: $item['UF_VALUE_NAME'] ?: $item['UF_PROPERTY_CODE'])) . '</option>';
         }
@@ -406,7 +406,7 @@ function prospektweb_uiseooptimt_render_actions(array $value, ?array $descriptio
 
 
 /** @param array<string, mixed> $params */
-function prospektweb_uiseooptimt_admin_url(array $params = []): string
+function prospektweb_propvalmanager_admin_url(array $params = []): string
 {
     $baseParams = [
         'mid' => ADMIN_MODULE_NAME,
@@ -417,7 +417,7 @@ function prospektweb_uiseooptimt_admin_url(array $params = []): string
 }
 
 /** @param array<string, mixed> $row @param array<string, mixed> $binding */
-function prospektweb_uiseooptimt_render_description_form(string $action, int $descriptionId, array $row, array $binding = [], bool $readonly = false): void
+function prospektweb_propvalmanager_render_description_form(string $action, int $descriptionId, array $row, array $binding = [], bool $readonly = false): void
 {
     $isCreate = $action === 'create';
     $submitLabel = $isCreate ? 'Сохранить описание' : 'Сохранить изменения';
@@ -427,17 +427,17 @@ function prospektweb_uiseooptimt_render_description_form(string $action, int $de
         echo '<div class="adm-info-message">Создание описания для значения ' . htmlspecialcharsbx((string)$binding['VALUE']) . ' (#' . (int)$binding['ID'] . ', XML_ID: ' . htmlspecialcharsbx((string)$binding['XML_ID']) . ').</div>';
     }
 
-    echo '<form method="post" enctype="multipart/form-data" action="' . PROSPEKTWEB_UISEOOPTIMT_SELF . '">';
+    echo '<form method="post" enctype="multipart/form-data" action="' . PROSPEKTWEB_PROPVALMANAGER_SELF . '">';
     echo bitrix_sessid_post();
     echo '<input type="hidden" name="description_action" value="' . htmlspecialcharsbx($action) . '">';
     if ($descriptionId > 0) {
         echo '<input type="hidden" name="DESCRIPTION_ID" value="' . $descriptionId . '">';
     }
     if (!empty($binding)) {
-        echo prospektweb_uiseooptimt_hidden_binding($binding);
+        echo prospektweb_propvalmanager_hidden_binding($binding);
     }
 
-    prospektweb_uiseooptimt_render_content_fields($row, $readonly);
+    prospektweb_propvalmanager_render_content_fields($row, $readonly);
     if (!$readonly) {
         echo '<div class="pwu-description-form-actions"><input type="submit" class="adm-btn-save" value="' . htmlspecialcharsbx($submitLabel) . '"></div>';
     }
@@ -446,7 +446,7 @@ function prospektweb_uiseooptimt_render_description_form(string $action, int $de
 }
 
 /** @param array<string, mixed> $value */
-function prospektweb_uiseooptimt_hidden_binding(array $value): string
+function prospektweb_propvalmanager_hidden_binding(array $value): string
 {
     return '<input type="hidden" name="UF_IBLOCK_ID" value="' . (int)$value['IBLOCK_ID'] . '">' .
         '<input type="hidden" name="UF_PROPERTY_ID" value="' . (int)$value['PROPERTY_ID'] . '">' .
@@ -457,7 +457,7 @@ function prospektweb_uiseooptimt_hidden_binding(array $value): string
 }
 
 /** @param array<string, mixed> $row */
-function prospektweb_uiseooptimt_render_content_fields(array $row, bool $readonly = false): void
+function prospektweb_propvalmanager_render_content_fields(array $row, bool $readonly = false): void
 {
     $disabled = $readonly ? ' disabled' : '';
     $fields = [
@@ -496,7 +496,7 @@ function prospektweb_uiseooptimt_render_content_fields(array $row, bool $readonl
     echo '</table>';
 }
 
-function prospektweb_uiseooptimt_render_description_card(int $id, PropertyValueDescriptionRepository $repository, bool $readonly): void
+function prospektweb_propvalmanager_render_description_card(int $id, PropertyValueDescriptionRepository $repository, bool $readonly): void
 {
     $row = $repository->getById($id);
 
@@ -508,6 +508,6 @@ function prospektweb_uiseooptimt_render_description_card(int $id, PropertyValueD
     echo '<div class="pwu-property-block">';
     echo '<h2>' . ($readonly ? 'Просмотр' : 'Редактирование') . ' описания #' . $id . '</h2>';
     echo '<div class="adm-info-message">Связано: инфоблок #' . (int)$row['UF_IBLOCK_ID'] . ', свойство ' . htmlspecialcharsbx((string)$row['UF_PROPERTY_CODE']) . ' (#' . (int)$row['UF_PROPERTY_ID'] . '), значение ' . htmlspecialcharsbx((string)$row['UF_VALUE_NAME']) . ' (#' . (int)$row['UF_VALUE_ID'] . ', XML_ID: ' . htmlspecialcharsbx((string)$row['UF_VALUE_XML_ID']) . '). Технические идентификаторы доступны только для просмотра; изменяются только контентные данные.</div>';
-    prospektweb_uiseooptimt_render_description_form('update', $id, $row, [], $readonly);
+    prospektweb_propvalmanager_render_description_form('update', $id, $row, [], $readonly);
     echo '</div>';
 }

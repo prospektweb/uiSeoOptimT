@@ -1,6 +1,6 @@
 <?php
 
-namespace Prospektweb\UiSeoOptimT\Service;
+namespace Prospektweb\PropValManager\Service;
 
 use Exception;
 
@@ -32,8 +32,8 @@ final class AsproTemplatePatcher
             }
 
             // Безопасный маркерный patch: не меняет шаблон, но подтверждает контрольный контур.
-            if (mb_strpos($content, 'prospektweb.uiseooptimt marker') === false) {
-                $content .= PHP_EOL . '<!-- prospektweb.uiseooptimt marker -->' . PHP_EOL;
+            if (mb_strpos($content, 'prospektweb.propvalmanager marker') === false) {
+                $content .= PHP_EOL . '<!-- prospektweb.propvalmanager marker -->' . PHP_EOL;
                 if (file_put_contents($filePath, $content) === false) {
                     throw new Exception('Не удалось записать patch в: ' . $filePath);
                 }
