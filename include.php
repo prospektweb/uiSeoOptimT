@@ -13,5 +13,6 @@ Loader::registerAutoLoadClasses(
         'Prospektweb\\PropValManager\\Service\\PropertyValueDescriptionInstaller' => 'lib/Service/PropertyValueDescriptionInstaller.php',
         'Prospektweb\\PropValManager\\Service\\PropertyValueDescriptionRepository' => 'lib/Service/PropertyValueDescriptionRepository.php',
         'Prospektweb\\PropValManager\\Service\\PropertyDescriptionService' => 'lib/Service/PropertyDescriptionService.php',
+        'Prospektweb\\PropValManager\\Service\\AdminPropertySettingsExtension' => 'lib/Service/AdminPropertySettingsExtension.php',
     ]
 );
