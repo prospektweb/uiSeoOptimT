@@ -108,6 +108,7 @@ $linkedMap = $repository->getLinkedMap($allValues);
 $availableDescriptions = $repository->getAvailableDescriptions();
 $editId = (int)$request->getQuery('edit_description_id');
 $viewId = (int)$request->getQuery('view_description_id');
+$createKey = (string)$request->getQuery('create_description_key');
 
 $aTabs = [[
     'DIV' => 'edit1',
@@ -118,10 +119,12 @@ $aTabs = [[
 $tabControl = new CAdminTabControl('tabControl', $aTabs);
 ?>
 <style>
-    .pwu-description-create > summary { list-style: none; }
-    .pwu-description-create > summary::marker { content: ''; }
-    .pwu-description-create > summary::-webkit-details-marker { display: none; }
-    .pwu-description-create form { margin-top: 10px; }
+    .pwu-property-block { margin: 22px 18px 28px; }
+    .pwu-property-block .adm-list-table-cell { padding: 10px 18px; vertical-align: top; }
+    .pwu-description-form { margin: 14px 0; padding: 16px 20px; background: #eef5f7; border: 1px solid #c9d7dc; }
+    .pwu-description-form .adm-detail-content-table { width: 100%; }
+    .pwu-description-form .adm-detail-content-table td { padding: 7px 10px; vertical-align: top; }
+    .pwu-description-form-actions { margin-top: 12px; padding-left: 30%; }
 </style>
 <form method="post" action="<?php echo PROSPEKTWEB_UISEOOPTIMT_SELF; ?>">
     <?php
@@ -178,8 +181,8 @@ $tabControl = new CAdminTabControl('tabControl', $aTabs);
     <?php prospektweb_uiseooptimt_render_description_card($editId ?: $viewId, $repository, $viewId > 0); ?>
 <?php endif; ?>
 
-<?php prospektweb_uiseooptimt_render_properties_block('Свойства товара типа «Список» с CALC_', $productProperties, $linkedMap, $availableDescriptions, $repository); ?>
-<?php prospektweb_uiseooptimt_render_properties_block('Свойства торговых предложений типа «Список» с CALC_', $offerProperties, $linkedMap, $availableDescriptions, $repository); ?>
+<?php prospektweb_uiseooptimt_render_properties_block('Свойства товара типа «Список» с CALC_', $productProperties, $linkedMap, $availableDescriptions, $repository, $createKey); ?>
+<?php prospektweb_uiseooptimt_render_properties_block('Свойства торговых предложений типа «Список» с CALC_', $offerProperties, $linkedMap, $availableDescriptions, $repository, $createKey); ?>
 
 <?php
 /** @return array<int, array{id:int,name:string,selected:bool}> */
@@ -331,11 +334,13 @@ function prospektweb_uiseooptimt_uploaded_file(string $inputName): ?array
 }
 
 /** @param array<int, array<string, mixed>> $properties @param array<string, array<string, mixed>> $linkedMap @param array<int, array<string, mixed>> $availableDescriptions */
-function prospektweb_uiseooptimt_render_properties_block(string $title, array $properties, array $linkedMap, array $availableDescriptions, PropertyValueDescriptionRepository $repository): void
+function prospektweb_uiseooptimt_render_properties_block(string $title, array $properties, array $linkedMap, array $availableDescriptions, PropertyValueDescriptionRepository $repository, string $createKey = ''): void
 {
+    echo '<div class="pwu-property-block">';
     echo '<h2>' . htmlspecialcharsbx($title) . '</h2>';
     if (empty($properties)) {
         echo '<p>Списочные свойства с CALC_ в названии или коде не найдены.</p>';
+        echo '</div>';
         return;
     }
 
@@ -360,15 +365,21 @@ function prospektweb_uiseooptimt_render_properties_block(string $title, array $p
                 echo '<span style="color:#999">Нет описания</span>';
             }
             echo '</td><td class="adm-list-table-cell">';
-            prospektweb_uiseooptimt_render_actions($value, $description, $availableDescriptions);
+            prospektweb_uiseooptimt_render_actions($value, $description, $availableDescriptions, $repository);
             echo '</td></tr>';
+            if (!$description && $createKey === $key) {
+                echo '<tr class="adm-list-table-row"><td class="adm-list-table-cell" colspan="5">';
+                prospektweb_uiseooptimt_render_description_form('create', 0, [], $value);
+                echo '</td></tr>';
+            }
         }
         echo '</table>';
     }
+    echo '</div>';
 }
 
 /** @param array<string, mixed> $value @param array<string, mixed>|null $description @param array<int, array<string, mixed>> $availableDescriptions */
-function prospektweb_uiseooptimt_render_actions(array $value, ?array $description, array $availableDescriptions): void
+function prospektweb_uiseooptimt_render_actions(array $value, ?array $description, array $availableDescriptions, PropertyValueDescriptionRepository $repository): void
 {
     $hidden = prospektweb_uiseooptimt_hidden_binding($value);
     if ($description) {
@@ -379,9 +390,10 @@ function prospektweb_uiseooptimt_render_actions(array $value, ?array $descriptio
         return;
     }
 
-    echo '<details class="pwu-description-create" style="display:inline-block"><summary style="list-style:none;cursor:pointer"><span class="adm-btn adm-btn-save">Создать описание</span></summary><form method="post" enctype="multipart/form-data" action="' . PROSPEKTWEB_UISEOOPTIMT_SELF . '">' . bitrix_sessid_post() . $hidden . '<input type="hidden" name="description_action" value="create">';
-    prospektweb_uiseooptimt_render_content_fields([]);
-    echo '<input type="submit" class="adm-btn-save" value="Создать описание"></form></details>';
+    $createUrl = prospektweb_uiseooptimt_admin_url([
+        'create_description_key' => $repository->makeKey((int)$value['IBLOCK_ID'], (int)$value['PROPERTY_ID'], (string)$value['XML_ID']),
+    ]);
+    echo '<a class="adm-btn adm-btn-save" href="' . htmlspecialcharsbx($createUrl) . '">Создать описание</a>';
 
     if (!empty($availableDescriptions)) {
         echo '<form method="post" action="' . PROSPEKTWEB_UISEOOPTIMT_SELF . '" style="margin-top:6px">' . bitrix_sessid_post() . $hidden . '<input type="hidden" name="description_action" value="link"><select name="EXISTING_DESCRIPTION_ID">';
@@ -390,6 +402,47 @@ function prospektweb_uiseooptimt_render_actions(array $value, ?array $descriptio
         }
         echo '</select> <input type="submit" class="adm-btn" value="Выбрать существующее описание"></form>';
     }
+}
+
+
+/** @param array<string, mixed> $params */
+function prospektweb_uiseooptimt_admin_url(array $params = []): string
+{
+    $baseParams = [
+        'mid' => ADMIN_MODULE_NAME,
+        'lang' => LANGUAGE_ID,
+    ];
+
+    return $GLOBALS['APPLICATION']->GetCurPage() . '?' . http_build_query(array_merge($baseParams, $params));
+}
+
+/** @param array<string, mixed> $row @param array<string, mixed> $binding */
+function prospektweb_uiseooptimt_render_description_form(string $action, int $descriptionId, array $row, array $binding = [], bool $readonly = false): void
+{
+    $isCreate = $action === 'create';
+    $submitLabel = $isCreate ? 'Сохранить описание' : 'Сохранить изменения';
+
+    echo '<div class="pwu-description-form">';
+    if ($isCreate && !empty($binding)) {
+        echo '<div class="adm-info-message">Создание описания для значения ' . htmlspecialcharsbx((string)$binding['VALUE']) . ' (#' . (int)$binding['ID'] . ', XML_ID: ' . htmlspecialcharsbx((string)$binding['XML_ID']) . ').</div>';
+    }
+
+    echo '<form method="post" enctype="multipart/form-data" action="' . PROSPEKTWEB_UISEOOPTIMT_SELF . '">';
+    echo bitrix_sessid_post();
+    echo '<input type="hidden" name="description_action" value="' . htmlspecialcharsbx($action) . '">';
+    if ($descriptionId > 0) {
+        echo '<input type="hidden" name="DESCRIPTION_ID" value="' . $descriptionId . '">';
+    }
+    if (!empty($binding)) {
+        echo prospektweb_uiseooptimt_hidden_binding($binding);
+    }
+
+    prospektweb_uiseooptimt_render_content_fields($row, $readonly);
+    if (!$readonly) {
+        echo '<div class="pwu-description-form-actions"><input type="submit" class="adm-btn-save" value="' . htmlspecialcharsbx($submitLabel) . '"></div>';
+    }
+    echo '</form>';
+    echo '</div>';
 }
 
 /** @param array<string, mixed> $value */
@@ -452,12 +505,9 @@ function prospektweb_uiseooptimt_render_description_card(int $id, PropertyValueD
         return;
     }
 
+    echo '<div class="pwu-property-block">';
     echo '<h2>' . ($readonly ? 'Просмотр' : 'Редактирование') . ' описания #' . $id . '</h2>';
     echo '<div class="adm-info-message">Связано: инфоблок #' . (int)$row['UF_IBLOCK_ID'] . ', свойство ' . htmlspecialcharsbx((string)$row['UF_PROPERTY_CODE']) . ' (#' . (int)$row['UF_PROPERTY_ID'] . '), значение ' . htmlspecialcharsbx((string)$row['UF_VALUE_NAME']) . ' (#' . (int)$row['UF_VALUE_ID'] . ', XML_ID: ' . htmlspecialcharsbx((string)$row['UF_VALUE_XML_ID']) . '). Технические идентификаторы доступны только для просмотра; изменяются только контентные данные.</div>';
-    echo '<form method="post" enctype="multipart/form-data" action="' . PROSPEKTWEB_UISEOOPTIMT_SELF . '">' . bitrix_sessid_post() . '<input type="hidden" name="description_action" value="update"><input type="hidden" name="DESCRIPTION_ID" value="' . $id . '">';
-    prospektweb_uiseooptimt_render_content_fields($row, $readonly);
-    if (!$readonly) {
-        echo '<input type="submit" class="adm-btn-save" value="Сохранить описание">';
-    }
-    echo '</form>';
+    prospektweb_uiseooptimt_render_description_form('update', $id, $row, [], $readonly);
+    echo '</div>';
 }
