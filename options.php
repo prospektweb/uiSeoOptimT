@@ -93,6 +93,11 @@ foreach ($notes as $note) {
     echo CAdminMessage::ShowNote($note);
 }
 
+if ((string)$request->getQuery('pvm_quick') === 'Y' || (string)$request->getPost('pvm_quick') === 'Y') {
+    prospektweb_propvalmanager_render_quick_description_page($request, $repository);
+    return;
+}
+
 $productsIblockId = ModuleConfig::getProductsIblockId();
 $offersIblockId = ModuleConfig::getOffersIblockId();
 if ($productsIblockId > 0 && $offersIblockId <= 0) {
@@ -405,6 +410,75 @@ function prospektweb_propvalmanager_render_actions(array $value, ?array $descrip
 }
 
 
+
+function prospektweb_propvalmanager_render_quick_description_page($request, PropertyValueDescriptionRepository $repository): void
+{
+    $binding = prospektweb_propvalmanager_quick_binding_from_request($request);
+    $postedDescriptionId = (int)$request->getPost('DESCRIPTION_ID');
+    $postedDescription = $postedDescriptionId > 0 ? $repository->getById($postedDescriptionId) : null;
+    if ($postedDescription && ((int)$binding['IBLOCK_ID'] <= 0 || (int)$binding['PROPERTY_ID'] <= 0 || (string)$binding['XML_ID'] === '')) {
+        $binding = prospektweb_propvalmanager_binding_from_description_row($postedDescription);
+    }
+    echo '<style>.pwu-property-block{margin:18px}.pwu-description-form{margin:14px 0;padding:16px 20px;background:#eef5f7;border:1px solid #c9d7dc}.pwu-description-form .adm-detail-content-table{width:100%}.pwu-description-form .adm-detail-content-table td{padding:7px 10px;vertical-align:top}.pwu-description-form-actions{margin-top:12px;padding-left:30%}.pwu-quick-actions{margin:0 18px 14px}</style>';
+    echo '<div class="pwu-property-block">';
+    echo '<h2>Описание значения свойства</h2>';
+
+    if ((int)$binding['IBLOCK_ID'] <= 0 || (int)$binding['PROPERTY_ID'] <= 0 || (string)$binding['XML_ID'] === '') {
+        echo CAdminMessage::ShowMessage('Не удалось определить инфоблок, свойство или XML_ID значения. Сохраните значение списка и откройте форму повторно.');
+        echo '</div>';
+        return;
+    }
+
+    $description = $postedDescription ?: $repository->findLinked((int)$binding['IBLOCK_ID'], (int)$binding['PROPERTY_ID'], (string)$binding['XML_ID']);
+    $settingsUrl = prospektweb_propvalmanager_admin_url();
+    echo '<div class="pwu-quick-actions"><a class="adm-btn" target="_blank" href="' . htmlspecialcharsbx($settingsUrl) . '">Открыть полные настройки модуля</a></div>';
+
+    if ($description) {
+        echo '<div class="adm-info-message">Описание уже привязано к значению ' . htmlspecialcharsbx((string)$description['UF_VALUE_NAME']) . ' (#' . (int)$description['UF_VALUE_ID'] . ', XML_ID: ' . htmlspecialcharsbx((string)$description['UF_VALUE_XML_ID']) . ').</div>';
+        prospektweb_propvalmanager_render_description_form('update', (int)$description['ID'], $description, []);
+    } else {
+        echo '<div class="adm-info-message">Создаётся описание для значения ' . htmlspecialcharsbx((string)$binding['VALUE']) . ' (#' . (int)$binding['ID'] . ', XML_ID: ' . htmlspecialcharsbx((string)$binding['XML_ID']) . ').</div>';
+        prospektweb_propvalmanager_render_description_form('create', 0, [], $binding);
+    }
+
+    echo '</div>';
+}
+
+
+function prospektweb_propvalmanager_binding_from_description_row(array $row): array
+{
+    return [
+        'IBLOCK_ID' => (int)($row['UF_IBLOCK_ID'] ?? 0),
+        'PROPERTY_ID' => (int)($row['UF_PROPERTY_ID'] ?? 0),
+        'PROPERTY_CODE' => (string)($row['UF_PROPERTY_CODE'] ?? ''),
+        'ID' => (int)($row['UF_VALUE_ID'] ?? 0),
+        'XML_ID' => (string)($row['UF_VALUE_XML_ID'] ?? ''),
+        'VALUE' => (string)($row['UF_VALUE_NAME'] ?? ''),
+    ];
+}
+
+function prospektweb_propvalmanager_quick_binding_from_request($request): array
+{
+    $get = static function (string $name) use ($request): string {
+        $postValue = $request->getPost($name);
+        if ($postValue !== null && $postValue !== '') {
+            return (string)$postValue;
+        }
+
+        $queryValue = $request->getQuery($name);
+        return $queryValue !== null ? (string)$queryValue : '';
+    };
+
+    return [
+        'IBLOCK_ID' => (int)$get('UF_IBLOCK_ID'),
+        'PROPERTY_ID' => (int)$get('UF_PROPERTY_ID'),
+        'PROPERTY_CODE' => $get('UF_PROPERTY_CODE'),
+        'ID' => (int)$get('UF_VALUE_ID'),
+        'XML_ID' => $get('UF_VALUE_XML_ID'),
+        'VALUE' => $get('UF_VALUE_NAME'),
+    ];
+}
+
 /** @param array<string, mixed> $params */
 function prospektweb_propvalmanager_admin_url(array $params = []): string
 {
@@ -430,6 +504,9 @@ function prospektweb_propvalmanager_render_description_form(string $action, int 
     echo '<form method="post" enctype="multipart/form-data" action="' . PROSPEKTWEB_PROPVALMANAGER_SELF . '">';
     echo bitrix_sessid_post();
     echo '<input type="hidden" name="description_action" value="' . htmlspecialcharsbx($action) . '">';
+    if ((string)\Bitrix\Main\Application::getInstance()->getContext()->getRequest()->getPost('pvm_quick') === 'Y' || (string)\Bitrix\Main\Application::getInstance()->getContext()->getRequest()->getQuery('pvm_quick') === 'Y') {
+        echo '<input type="hidden" name="pvm_quick" value="Y">';
+    }
     if ($descriptionId > 0) {
         echo '<input type="hidden" name="DESCRIPTION_ID" value="' . $descriptionId . '">';
     }

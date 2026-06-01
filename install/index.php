@@ -8,6 +8,7 @@ use Prospektweb\PropValManager\Service\AsproTemplatePatcher;
 use Prospektweb\PropValManager\Service\ModuleConfig;
 use Prospektweb\PropValManager\Service\PropertyManager;
 use Prospektweb\PropValManager\Service\PropertyValueDescriptionInstaller;
+use Prospektweb\PropValManager\Service\AdminPropertySettingsExtension;
 
 Loc::loadMessages(__FILE__);
 
@@ -15,6 +16,7 @@ require_once dirname(__DIR__) . '/lib/Service/ModuleConfig.php';
 require_once dirname(__DIR__) . '/lib/Service/PropertyManager.php';
 require_once dirname(__DIR__) . '/lib/Service/AsproTemplatePatcher.php';
 require_once dirname(__DIR__) . '/lib/Service/PropertyValueDescriptionInstaller.php';
+require_once dirname(__DIR__) . '/lib/Service/AdminPropertySettingsExtension.php';
 
 class prospektweb_propvalmanager extends CModule
 {
@@ -269,9 +271,23 @@ class prospektweb_propvalmanager extends CModule
 
     private function registerEvents(): void
     {
+        RegisterModuleDependences(
+            AdminPropertySettingsExtension::EVENT_MODULE,
+            AdminPropertySettingsExtension::EVENT_NAME,
+            $this->MODULE_ID,
+            AdminPropertySettingsExtension::class,
+            'onEndBufferContent'
+        );
     }
 
     private function unRegisterEvents(): void
     {
+        UnRegisterModuleDependences(
+            AdminPropertySettingsExtension::EVENT_MODULE,
+            AdminPropertySettingsExtension::EVENT_NAME,
+            $this->MODULE_ID,
+            AdminPropertySettingsExtension::class,
+            'onEndBufferContent'
+        );
     }
 }
