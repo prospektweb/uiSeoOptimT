@@ -2,7 +2,6 @@
 
 namespace Prospektweb\PropValManager\Service;
 
-use Bitrix\Main\Application;
 use Bitrix\Main\Context;
 
 final class AdminPropertySettingsExtension
@@ -150,19 +149,13 @@ final class AdminPropertySettingsExtension
     }
 
     function openUrl(url) {
-        if (window.BX && BX.CAdminDialog) {
-            var dialog = new BX.CAdminDialog({
-                title: 'Описание значения свойства',
-                content_url: url,
-                width: 980,
-                height: 700,
-                resizable: true
-            });
-            dialog.Show();
-            return false;
-        }
         window.open(url, '_blank');
         return false;
+    }
+
+    function isCalcProperty(form) {
+        var propertyCode = getPropertyCode(form);
+        return propertyCode !== '' && propertyCode.toUpperCase().indexOf('CALC_') !== -1;
     }
 
     function makeButton(text, title, onClick) {
@@ -183,6 +176,9 @@ final class AdminPropertySettingsExtension
 
         var iblockId = getIblockId(form);
         if (managedIblocks.length && managedIblocks.indexOf(String(iblockId)) === -1) {
+            return;
+        }
+        if (!isCalcProperty(form)) {
             return;
         }
 
